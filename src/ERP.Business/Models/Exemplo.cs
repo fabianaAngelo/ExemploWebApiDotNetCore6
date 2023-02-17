@@ -11,11 +11,16 @@ namespace ERP.Business.Models
         public DateTime? CreateAt { get; set; }
         public string Nome { get; set; }
         public Boolean IsActive { get; set; }
-        public Exemplo(string nome)
+        public string CpfCnpj { get; set; }
+        public TipoExemplo TipoDocumento { get; set; }
+
+        public Exemplo(string nome, string cpfCnpj)
         {
             CreateAt = DateTime.Now;
             Nome = nome;
-            IsActive = true;    
+            IsActive = true;
+            CpfCnpj = cpfCnpj;
+            TipoDocumento = TipoExemplo.PessoaJuridica;
         }
         public Exemplo()
         {

@@ -23,6 +23,10 @@ namespace ERP.Data.Mappings
                 .IsRequired()
                 .HasColumnType("bit");
 
+            builder.Property(c => c.CpfCnpj)
+                .IsRequired(false)
+                .HasColumnType("varchar(14)");
+
             builder.ToTable("Exemplos");
         }
     }

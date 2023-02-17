@@ -1,5 +1,6 @@
 ﻿using ERP.Business.Interfaces.Exemplos;
 using ERP.Business.Models;
+using ERP.Business.Models.Validations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ERP.Business.Services
 {
-    public class ExemploService : IExemploService
+    public class ExemploService : BaseService, IExemploService
     {
         private readonly IExemploRepository _exemploRepository;
         public ExemploService(IExemploRepository exemploRepository)
@@ -17,6 +18,8 @@ namespace ERP.Business.Services
         }
         public async Task Add(Exemplo exemplo)
         {
+            if (!ExecuteValidation(new ExemploValidation(), exemplo)) return;
+
             await _exemploRepository.Add(exemplo);
         }
         public async Task<IEnumerable<Exemplo>> GetAll()
@@ -29,6 +32,8 @@ namespace ERP.Business.Services
         }
         public async Task Update(Exemplo exemplo)
         {
+            if (!ExecuteValidation(new ExemploValidation(), exemplo)) return;
+
             await _exemploRepository.Update(exemplo);
         }
 

@@ -21,7 +21,7 @@ namespace ERP.Api.Controllers
         [HttpPost]
         public async Task<Exemplo> Add(ExemploCreateViewModel viewModel)
         {
-            var exemplo = new Exemplo(viewModel.Nome);
+            var exemplo = new Exemplo(viewModel.Nome, viewModel.CpfCnpj);
 
             await _exemploService.Add(exemplo);
             return exemplo;
