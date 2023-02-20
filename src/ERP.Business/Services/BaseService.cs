@@ -1,16 +1,18 @@
-﻿using ERP.Business.Models;
+﻿using ERP.Business.ErrorNotifications;
+using ERP.Business.Interfaces;
+using ERP.Business.Models;
 using FluentValidation;
 using FluentValidation.Results;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ERP.Business.Services
 {
     public abstract class BaseService
     {
+        private readonly IErrorNotifier _errorNotifier;
+        public BaseService(IErrorNotifier errorNotifier)
+        {
+            _errorNotifier = errorNotifier;
+        }
         protected void NotifyError(ValidationResult validationResult)
         {
            foreach(var error in validationResult.Errors)
@@ -20,7 +22,7 @@ namespace ERP.Business.Services
         }
         protected void NotifyError(string mensage)
         {
-            //Propagar esse erro até a camada de apresentacao
+            _errorNotifier.Handle(new ErrorNotification(mensage));
         }
         protected bool ExecuteValidation<TV, TE>( TV validation, TE entity) where TV : AbstractValidator<TE> where TE : Entity
         {

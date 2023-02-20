@@ -21,16 +21,16 @@ namespace ERP.Business.Models.Validations
                 RuleFor(f => f.CpfCnpj.Length).Equal(11)
                     .WithMessage("O campo CPF precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
                 RuleFor(f => UsefulFunctions.ValidateCpf(f.CpfCnpj)).Equal(true)
-                    .WithMessage("O CPF fornecido é inválido.");
+                    .WithMessage("CPF fornecido é inválido.");
             });
 
 
             When(f => f.TipoDocumento == TipoExemplo.PessoaJuridica, () =>
             {
                 RuleFor(f => f.CpfCnpj.Length).Equal(14)
-                    .WithMessage("O campo Documento precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
+                    .WithMessage("O campo CNPJ precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
                 RuleFor(f => UsefulFunctions.ValidateCNPJ(f.CpfCnpj)).Equal(true)
-                    .WithMessage("O documento fornecido é inválido.");
+                    .WithMessage("CNPJ fornecido é inválido.");
             });
         }
     }
