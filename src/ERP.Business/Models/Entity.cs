@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using FluentValidation.Results;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ERP.Business.Models

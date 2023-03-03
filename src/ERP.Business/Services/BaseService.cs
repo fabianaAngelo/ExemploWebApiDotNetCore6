@@ -37,5 +37,16 @@ namespace ERP.Business.Services
 
             return false;
         }
+        protected bool ExecuteValidation<TE>(TE entity) where TE : Entity
+        {
+            if (entity.IsValid())
+            {
+                return true;
+            }
+
+            NotifyError(entity.ValidationResult);
+
+            return false;
+        }
     }
 }

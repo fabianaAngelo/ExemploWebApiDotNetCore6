@@ -1,9 +1,5 @@
-﻿using ERP.Business.ErrorNotifications;
-using ERP.Business.Interfaces;
-using ERP.Business.Interfaces.Exemplos;
-using ERP.Business.Services;
+﻿using ERP.Api.Configuration;
 using ERP.Data.Context;
-using ERP.Data.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -28,15 +24,13 @@ namespace ERP.Api
             }
 
             Configuration = builder.Build();
+            
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped<IExemploService, ExemploService>();
-            services.AddScoped<IExemploRepository, ExemploRepository>();
-            services.AddScoped<IErrorNotifier, ErrorNotifier>();
-
+            
             services.AddAutoMapper(typeof(Startup));
 
             services.AddSwaggerGen(c =>
@@ -48,10 +42,15 @@ namespace ERP.Api
                 context => context.UseMySql(Configuration.GetConnectionString("DataContext"), ServerVersion.AutoDetect(Configuration.GetConnectionString("DataContext")))
             );
 
+            services.AddIdentityConfiguration(Configuration);
+
             services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
+
+            services.ResolveDependencies();
+            services.AddHttpContextAccessor();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -66,7 +65,7 @@ namespace ERP.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
