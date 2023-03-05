@@ -22,6 +22,7 @@ namespace ERP.Api.Configuration
                 })
                 //.AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>()
+                .AddErrorDescriber<IdentityTranslatedMessages>()
                 .AddDefaultTokenProviders();
 
             return services;

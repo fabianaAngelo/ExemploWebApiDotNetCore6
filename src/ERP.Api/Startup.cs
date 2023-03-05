@@ -30,6 +30,7 @@ namespace ERP.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalization(options => options.ResourcesPath = "IdentityTranslatedMessages");
             //services.AddDistributedMemoryCache();
             services.AddControllers();
             
