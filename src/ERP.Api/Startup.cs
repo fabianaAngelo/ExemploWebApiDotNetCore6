@@ -1,5 +1,6 @@
 ﻿using ERP.Api.Configuration;
 using ERP.Data.Context;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -29,6 +30,7 @@ namespace ERP.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddDistributedMemoryCache();
             services.AddControllers();
             
             services.AddAutoMapper(typeof(Startup));
@@ -50,11 +52,17 @@ namespace ERP.Api
             });
 
             services.ResolveDependencies();
+
+            services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(Path.GetTempPath()));
+
             services.AddHttpContextAccessor();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseAuthentication();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

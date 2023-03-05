@@ -1,7 +1,9 @@
-﻿using ERP.Api.ViewModels;
+﻿using ERP.Api.Extensions;
+using ERP.Api.ViewModels.UserViewModel;
 using ERP.Business.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ERP.Api.Controllers
 {
@@ -10,13 +12,16 @@ namespace ERP.Api.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly AppSettings _appSettings;
 
-        public AuthController(IErrorNotifier errorNotifier, 
-                            SignInManager<IdentityUser> signInManager, 
-                            UserManager<IdentityUser> userManager) : base(errorNotifier)
+        public AuthController(IErrorNotifier errorNotifier,
+                            SignInManager<IdentityUser> signInManager,
+                            UserManager<IdentityUser> userManager,
+                            IOptions<AppSettings> appSettings) : base(errorNotifier)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _appSettings = appSettings.Value;
         }
 
         [HttpPost("new-account")]
@@ -28,18 +33,16 @@ namespace ERP.Api.Controllers
             {
                 UserName = registerUser.Email,
                 Email = registerUser.Email,
-                EmailConfirmed = true
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, registerUser.Password);
             if (result.Succeeded)
             {
-                //await _signInManager.SignInAsync(user, isPersistent: false);
-                //return CustomResponse(registerUser);
+                await _signInManager.SignInAsync(user, isPersistent: false);
                 return CustomResponse(registerUser);
             }
-
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 NotifyError(error.Description);
             }
@@ -53,18 +56,19 @@ namespace ERP.Api.Controllers
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
-
             if (result.Succeeded)
             {
                 return CustomResponse(loginUser);
             }
-            if(result.IsLockedOut)
+            if (result.IsLockedOut)
             {
                 NotifyError("Usuário temporariamente bloqueado por tentativas inválidas");
                 return CustomResponse(loginUser);
             }
-            NotifyError("Usuário ou senha incorretos");
+
+            NotifyError("Usuário ou Senha incorretos");
             return CustomResponse(loginUser);
+
         }
     }
 }

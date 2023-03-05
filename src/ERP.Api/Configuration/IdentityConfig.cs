@@ -1,7 +1,11 @@
-﻿using ERP.Business.Models;
+﻿using ERP.Api.Extensions;
+using ERP.Business.Models;
 using ERP.Data.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace ERP.Api.Configuration
 {
@@ -10,15 +14,15 @@ namespace ERP.Api.Configuration
         public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddIdentityCore<ApplicationUser>
+            services.AddIdentity<IdentityUser, IdentityRole>
                 (options =>
                 {
                     options.SignIn.RequireConfirmedAccount = false;
                     options.User.RequireUniqueEmail = false;
                 })
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<DataContext>();
-                //.AddDefaultTokenProviders();
+                //.AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<DataContext>()
+                .AddDefaultTokenProviders();
 
             return services;
         }
