@@ -25,6 +25,34 @@ namespace ERP.Api.Configuration
                 .AddErrorDescriber<IdentityTranslatedMessages>()
                 .AddDefaultTokenProviders();
 
+            //JWT
+            var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                //é importante exigir o HTTPS
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    //permitindo todos os dominios
+                    ValidateAudience = false,
+                    //ValidAudience = appSettings.ValidIn,
+                    ValidIssuer = appSettings.Emitter
+                };
+            });
+
             return services;
         }
         public static IApplicationBuilder UseIdentityConfiguration(this IApplicationBuilder app)

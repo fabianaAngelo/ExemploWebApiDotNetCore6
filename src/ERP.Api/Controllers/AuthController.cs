@@ -4,6 +4,9 @@ using ERP.Business.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace ERP.Api.Controllers
 {
@@ -40,7 +43,7 @@ namespace ERP.Api.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return CustomResponse(registerUser);
+                return CustomResponse(GenerateJwt());
             }
             foreach (var error in result.Errors)
             {
@@ -58,7 +61,7 @@ namespace ERP.Api.Controllers
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
             if (result.Succeeded)
             {
-                return CustomResponse(loginUser);
+                return CustomResponse(GenerateJwt());
             }
             if (result.IsLockedOut)
             {
@@ -69,6 +72,22 @@ namespace ERP.Api.Controllers
             NotifyError("Usuário ou Senha incorretos");
             return CustomResponse(loginUser);
 
+        }
+
+        private string GenerateJwt()
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = _appSettings.Emitter,
+                Audience = _appSettings.ValidIn,
+                Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiryHours),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            });
+
+            var encondedToken = tokenHandler.WriteToken(token);
+            return encondedToken;
         }
     }
 }
