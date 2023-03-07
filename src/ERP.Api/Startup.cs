@@ -1,5 +1,8 @@
 ﻿using ERP.Api.Configuration;
+using ERP.Business.Interfaces.BackOfficeUsers;
+using ERP.Business.Services;
 using ERP.Data.Context;
+using ERP.Data.Repository;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +36,10 @@ namespace ERP.Api
             services.AddLocalization(options => options.ResourcesPath = "IdentityTranslatedMessages");
             //services.AddDistributedMemoryCache();
             services.AddControllers();
-            
+
+            services.AddScoped<IBackOfficeUsersService, BackOfficeUserService>();
+            services.AddScoped<IBackOfficeUsersRepository, BackOfficeUserRepository>();
+
             services.AddAutoMapper(typeof(Startup));
 
             services.AddSwaggerGen(c =>
