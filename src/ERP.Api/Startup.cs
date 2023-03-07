@@ -1,4 +1,6 @@
 ﻿using ERP.Api.Configuration;
+using ERP.Api.Extensions;
+using ERP.Business.Interfaces;
 using ERP.Business.Interfaces.BackOfficeUsers;
 using ERP.Business.Services;
 using ERP.Data.Context;
@@ -39,6 +41,9 @@ namespace ERP.Api
 
             services.AddScoped<IBackOfficeUsersService, BackOfficeUserService>();
             services.AddScoped<IBackOfficeUsersRepository, BackOfficeUserRepository>();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IUser, AspNetUser>();
 
             services.AddAutoMapper(typeof(Startup));
 

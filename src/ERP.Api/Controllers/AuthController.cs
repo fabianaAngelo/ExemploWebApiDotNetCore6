@@ -23,7 +23,8 @@ namespace ERP.Api.Controllers
         public AuthController(IErrorNotifier errorNotifier,
                             SignInManager<IdentityUser> signInManager,
                             UserManager<IdentityUser> userManager,
-                            IOptions<AppSettings> appSettings) : base(errorNotifier)
+                            IOptions<AppSettings> appSettings,
+                            IUser user) : base(errorNotifier, user)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -56,8 +57,8 @@ namespace ERP.Api.Controllers
             return CustomResponse(registerUser);
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginUserViewModel loginUser)
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login([FromBody]LoginUserViewModel loginUser)
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 

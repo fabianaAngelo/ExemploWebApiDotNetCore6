@@ -15,12 +15,15 @@ namespace ERP.Api.Controllers
 
         private readonly IBackOfficeUsersService _backOfficeUsersService;
         private readonly IMapper _mapper;
+        private readonly IUser _appUser;
         public BackOfficeUsersController(IBackOfficeUsersService backOfficeUsersService,
             IMapper mapper,
-            IErrorNotifier erroNotifier) : base(erroNotifier)
+            IErrorNotifier erroNotifier,
+            IUser user) : base(erroNotifier, user)
         {
             _backOfficeUsersService = backOfficeUsersService;
             _mapper = mapper;
+            _appUser = user;
         }
         
         [HttpPost]
@@ -29,7 +32,7 @@ namespace ERP.Api.Controllers
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var exemplo = new BackOfficeUser(viewModel.Nome/*, viewModel.CpfCnpj*/);
-
+            Guid userId = _appUser.GetUserId();
             await _backOfficeUsersService.Add(exemplo);
             return CustomResponse(viewModel);
         }

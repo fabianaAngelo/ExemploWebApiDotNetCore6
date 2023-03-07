@@ -8,10 +8,21 @@ namespace ERP.Api.Controllers
     public class MainController<T> : ControllerBase where T : ControllerBase
     {
         private readonly IErrorNotifier _errorNotifier;
+        public readonly IUser AppUser;
 
-        public MainController(IErrorNotifier errorNotifier)
+        protected Guid UserId { get; set; }
+        protected bool IsAuthenticated { get; set; }
+
+        public MainController(IErrorNotifier errorNotifier, IUser appUser)
         {
             _errorNotifier = errorNotifier;
+            AppUser = appUser;
+
+            if (appUser.IsAuthenticated())
+            {
+                UserId = appUser.GetUserId();
+                IsAuthenticated = true;
+            }
         }
         protected bool validOperation()
         {
