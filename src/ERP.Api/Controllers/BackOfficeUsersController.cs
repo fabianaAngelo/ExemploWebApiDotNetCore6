@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers
-{   
-    [Authorize(Roles ="Admin")]
+{
+    //[Authorize(Roles = "Admin")]
     [Route("api/backofficeusers")]
     public class BackOfficeUsersController : MainController<BackOfficeUsersController>
     {
@@ -25,16 +25,16 @@ namespace ERP.Api.Controllers
             _mapper = mapper;
             _appUser = user;
         }
-        
+
         [HttpPost]
-        public async Task<ActionResult<BackOfficeUserCreateViewModel>> Add(BackOfficeUserCreateViewModel viewModel)
+        public async Task<ActionResult<BackOfficeUserCreateViewModel>> Add([FromBody]BackOfficeUserCreateViewModel userViewModel)
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
+            
+            var backOfficeUser = new BackOfficeUser(userViewModel.Name, userViewModel.CPF, userViewModel.Email);
 
-            var exemplo = new BackOfficeUser(viewModel.Nome/*, viewModel.CpfCnpj*/);
-            Guid userId = _appUser.GetUserId();
-            await _backOfficeUsersService.Add(exemplo);
-            return CustomResponse(viewModel);
+            await _backOfficeUsersService.Add(backOfficeUser, userViewModel.Password, userViewModel.RoleId);
+            return CustomResponse(userViewModel);
         }
 
     }

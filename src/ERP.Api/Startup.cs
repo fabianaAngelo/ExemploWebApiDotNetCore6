@@ -2,6 +2,8 @@
 using ERP.Api.Extensions;
 using ERP.Business.Interfaces;
 using ERP.Business.Interfaces.BackOfficeUsers;
+using ERP.Business.Interfaces.PhysicalPersons;
+using ERP.Business.Interfaces.Users;
 using ERP.Business.Services;
 using ERP.Data.Context;
 using ERP.Data.Repository;
@@ -35,12 +37,20 @@ namespace ERP.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<DataContext>();
             services.AddLocalization(options => options.ResourcesPath = "IdentityTranslatedMessages");
             //services.AddDistributedMemoryCache();
             services.AddControllers();
 
+            
             services.AddScoped<IBackOfficeUsersService, BackOfficeUserService>();
             services.AddScoped<IBackOfficeUsersRepository, BackOfficeUserRepository>();
+
+            services.AddScoped<IPhysicalPersonRepository, PhysicalPersonRepository>();
+            services.AddScoped<IPhysicalPersonService, PhysicalPersonService>();
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IUser, AspNetUser>();

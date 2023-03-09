@@ -14,7 +14,7 @@ namespace ERP.Api.Configuration
         public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddIdentity<IdentityUser, IdentityRole>
+            services.AddIdentity<ApplicationUser, ApplicationRole>
                 (options =>
                 {
                     options.SignIn.RequireConfirmedAccount = false;

@@ -19,7 +19,6 @@
 		<ProjectReference Include="..\ERP.Business\ERP.Business.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Mappings\" />
 	  <Folder Include="Migrations\" />
 	</ItemGroup>
 </Project>

@@ -1,62 +1,68 @@
 ﻿using ERP.Business.Interfaces;
 using ERP.Business.Interfaces.BackOfficeUsers;
+using ERP.Business.Interfaces.Users;
 using ERP.Business.Models;
 using ERP.Business.Models.Validations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Transactions;
 
 namespace ERP.Business.Services
 {
     public class BackOfficeUserService : BaseService, IBackOfficeUsersService
     {
-        private readonly IBackOfficeUsersRepository _exemploRepository;
-        public BackOfficeUserService(IBackOfficeUsersRepository exemploRepository, IErrorNotifier errorNotifier) : base(errorNotifier)
+        private readonly IBackOfficeUsersRepository _backOfficeUserRepository;
+        private readonly IUserService _userService;
+        public BackOfficeUserService(IBackOfficeUsersRepository exemploRepository, IErrorNotifier errorNotifier,
+            IUserService userService) : base(errorNotifier)
         {
-            _exemploRepository = exemploRepository;
+            _backOfficeUserRepository = exemploRepository;
+            _userService = userService;
         }
-        public async Task Add(BackOfficeUser backOffice)
+        public async Task Add(BackOfficeUser backOfficeUser, string password, Guid roleId)
         {
-            if (!ExecuteValidation(new BackOfficeUserValidation(), backOffice)) return;
+            if (!ExecuteValidation(new BackOfficeUserValidation(), backOfficeUser)) return;
 
-            //if (_exemploRepository.Search(f => f.CpfCnpj == exemplo.CpfCnpj).Result.Any())
-            //{
-            //    NotifyError("CPF informado já existe.");
-            //    return;
-            //}
+            using (TransactionScope tr = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var succeeded = await _userService.Add(backOfficeUser.User, password);
+                if (succeeded)
+                {
+                    var roleSucceeded = await _userService.AddRole(backOfficeUser.User, roleId);
+                    if (roleSucceeded)
+                    {
+                        await _backOfficeUserRepository.Add(backOfficeUser);
+                        tr.Complete();
+                    }
+                }
+            }
+        }
+        //public async Task<IEnumerable<BackOfficeUser>> GetAll()
+        //{
+        //    return await _backOfficeUserRepository.GetAll();
+        //}
+        //public async Task<BackOfficeUser> GetById(Guid id)
+        //{
+        //    return await _backOfficeUserRepository.GetById(id);
+        //}
+        //public async Task Update(BackOfficeUser backOffice)
+        //{
+        //    if (!ExecuteValidation(new BackOfficeUserValidation(), backOffice)) return;
 
-            await _exemploRepository.Add(backOffice);
-        }
-        public async Task<IEnumerable<BackOfficeUser>> GetAll()
-        {
-            return await _exemploRepository.GetAll();
-        }
-        public async Task<BackOfficeUser> GetById(Guid id)
-        {
-            return await _exemploRepository.GetById(id);
-        }
-        public async Task Update(BackOfficeUser exemplo)
-        {
-            if (!ExecuteValidation(new BackOfficeUserValidation(), exemplo)) return;
+        //    if (_backOfficeUserRepository.Search(f => f.PhysicalPerson.CPF == backOffice.PhysicalPerson.CPF && f.Id != backOffice.Id).Result.Any())
+        //    {
+        //        NotifyError("CNPJ informado já existe.");
+        //        return;
+        //    }
 
-            //if (_exemploRepository.Search(f => f.CpfCnpj == exemplo.CpfCnpj && f.Id != exemplo.Id).Result.Any())
-            //{
-            //    NotifyError("CNPJ informado já existe.");
-            //    return;
-            //}
+        //    await _backOfficeUserRepository.Update(backOffice);
+        //}
 
-            await _exemploRepository.Update(exemplo);
-        }
-
-        public async Task Remove(Guid id)
-        {
-            await _exemploRepository.Remove(id);
-        }
+        //public async Task Remove(Guid id)
+        //{
+        //    await _backOfficeUserRepository.Remove(id);
+        //}
         public void Dispose()
         {
-            _exemploRepository?.Dispose();
+            _backOfficeUserRepository?.Dispose();
         }
     }
 }

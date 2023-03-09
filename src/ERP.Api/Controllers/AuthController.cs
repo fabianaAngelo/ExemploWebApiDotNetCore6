@@ -2,6 +2,7 @@
 using ERP.Api.ViewModels.Users;
 using ERP.Api.ViewModels.UserViewModel;
 using ERP.Business.Interfaces;
+using ERP.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,13 @@ namespace ERP.Api.Controllers
     [Route("api")]
     public class AuthController : MainController<AuthController>
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppSettings _appSettings;
 
         public AuthController(IErrorNotifier errorNotifier,
-                            SignInManager<IdentityUser> signInManager,
-                            UserManager<IdentityUser> userManager,
+                            SignInManager<ApplicationUser> signInManager,
+                            UserManager<ApplicationUser> userManager,
                             IOptions<AppSettings> appSettings,
                             IUser user) : base(errorNotifier, user)
         {
@@ -31,31 +32,31 @@ namespace ERP.Api.Controllers
             _appSettings = appSettings.Value;
         }
 
-        [HttpPost("new-account")]
-        public async Task<ActionResult> Register(RegisterUserViewModel registerUser)
-        {
-            if (!ModelState.IsValid) return CustomResponse(ModelState);
+        //[HttpPost("new-account")]
+        //public async Task<ActionResult> Register(RegisterUserViewModel registerUser)
+        //{
+        //    if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            var user = new IdentityUser
-            {
-                UserName = registerUser.Email,
-                Email = registerUser.Email,
-                EmailConfirmed = false
-            };
+        //    var user = new ApplicationUser
+        //    {
+        //        UserName = registerUser.Email,
+        //        Email = registerUser.Email,
+        //        EmailConfirmed = false
+        //    };
 
-            var result = await _userManager.CreateAsync(user, registerUser.Password);
-            if (result.Succeeded)
-            {
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return CustomResponse(await GenerateJwt(user.Email));
-            }
-            foreach (var error in result.Errors)
-            {
-                NotifyError(error.Description);
-            }
+        //    var result = await _userManager.CreateAsync(user, registerUser.Password);
+        //    if (result.Succeeded)
+        //    {
+        //        await _signInManager.SignInAsync(user, isPersistent: false);
+        //        return CustomResponse(await GenerateJwt(user.Email));
+        //    }
+        //    foreach (var error in result.Errors)
+        //    {
+        //        NotifyError(error.Description);
+        //    }
 
-            return CustomResponse(registerUser);
-        }
+        //    return CustomResponse(registerUser);
+        //}
 
         [HttpPost("Login")]
         public async Task<ActionResult> Login([FromBody]LoginUserViewModel loginUser)
@@ -65,7 +66,13 @@ namespace ERP.Api.Controllers
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
             if (result.Succeeded)
             {
-                return CustomResponse(await GenerateJwt(loginUser.Email));
+                var user = await _userManager.FindByNameAsync(loginUser.Email);
+                if (user.Disabled || user.IsDeleted)
+                {
+                    NotifyError("Usuário ou Senha incorretos");
+                    return CustomResponse(loginUser);
+                }
+                return CustomResponse(await GenerateJwt(user));
             }
             if (result.IsLockedOut)
             {
@@ -78,9 +85,9 @@ namespace ERP.Api.Controllers
 
         }
 
-        private async Task<LoginResponseViewModel> GenerateJwt(string email)
+        private async Task<LoginResponseViewModel> GenerateJwt(ApplicationUser user)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            //var user = await _userManager.FindByEmailAsync(email);
             var claims = await GetClaims(user);
 
             var identityClaims = new ClaimsIdentity();
@@ -95,7 +102,7 @@ namespace ERP.Api.Controllers
                 UserToken = userData
             };
         }
-        private async Task<IList<Claim>> GetClaims(IdentityUser user)
+        private async Task<IList<Claim>> GetClaims(ApplicationUser user)
         {
             var claims = await _userManager.GetClaimsAsync(user);
             var userRoles = await _userManager.GetRolesAsync(user);
@@ -114,7 +121,7 @@ namespace ERP.Api.Controllers
             return claims;
         }
 
-        private async Task<UserTokenViewModel> GetUserData(IdentityUser user, IList<Claim> claims)
+        private async Task<UserTokenViewModel> GetUserData(ApplicationUser user, IList<Claim> claims)
         {
             var notTypeResults = new List<string>(){
                 JwtRegisteredClaimNames.Sub,

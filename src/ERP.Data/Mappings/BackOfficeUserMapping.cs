@@ -13,15 +13,15 @@ namespace ERP.Data.Mappings
         {
             builder.HasKey(d => d.Id);
 
-            builder.Property(c => c.Nome)
-                .IsRequired()
-                .HasColumnType("varchar(256)");
+            builder.HasOne(f => f.User)
+                .WithOne();
 
             builder.Property(d => d.CreateAt)
                 .IsRequired(false)
                 .HasColumnType("datetime");
 
-            builder.Property(d => d.IsActive).HasDefaultValue(true)
+            builder.Property(c => c.IsDeleted)
+                .HasDefaultValue(false)
                 .IsRequired()
                 .HasColumnType("bit");
 

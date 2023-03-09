@@ -12,9 +12,9 @@ namespace ERP.Business.Models.Validations
     {
         public BackOfficeUserValidation()
         {
-            RuleFor(f => f.Nome)
-                .NotEmpty().WithMessage("O campo {PropertyName} precisa ser fornecido")
-                .Length(2, 100).WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
+            //RuleFor(f => f.Nome)
+            //    .NotEmpty().WithMessage("O campo {PropertyName} precisa ser fornecido")
+            //    .Length(2, 100).WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
                 //RuleFor(f => f.CpfCnpj.Length).Equal(11)
                 //    .WithMessage("O campo CPF precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
